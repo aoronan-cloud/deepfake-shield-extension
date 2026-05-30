@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>Shield Detector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🛡️ Shield</div>
+        <div class="version">v1.0.0</div>
+    </div>
+
+    <div class="main-content">
+        <div class="status-card">
+            <div class="status-indicator">
+                <div class="pulse-dot" id="status-dot"></div>
+                <span id="status-text">Motor IA Ativo</span>
+            </div>
+            <p class="status-desc">Monitoramento do DOM e extração WebRTC em operação.</p>
+        </div>
+
+        <div class="control-row">
+            <span>Proteção em Tempo Real</span>
+            <label class="switch">
+                <input type="checkbox" id="power-switch" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="#" id="github-link">🔗 GitHub Repositório</a>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
