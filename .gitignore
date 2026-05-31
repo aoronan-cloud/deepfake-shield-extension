@@ -16,3 +16,12 @@ Thumbs.db
 
 # IMPORTANTE: Nós NÃO vamos ignorar a pasta `dist/` ou `public/` 
 # pois elas contêm a extensão compilada e os modelos que os usuários precisam para rodar direto do repositório.
+
+# Ambientes Virtuais Python e ML
+ai_env/
+ai_venv/
+venv/
+env/
+__pycache__/
+*.pt
+*.pth
