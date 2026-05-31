@@ -1,8 +1,10 @@
 // src/ui/shadow_overlay.js
 
 export class SecurityUI {
-    constructor(videoElement) {
+    // RECEBENDO O CONTAINER COMO 2º PARÂMETRO
+    constructor(videoElement, container) {
         this.videoElement = videoElement;
+        this.container = container || videoElement.parentElement; // Fallback seguro
         
         this.overlayContainer = document.createElement('div');
         this.overlayContainer.style.position = 'absolute';
@@ -11,9 +13,14 @@ export class SecurityUI {
 
         this.shadow = this.overlayContainer.attachShadow({ mode: 'closed' });
         this._injectHTML();
-        document.body.appendChild(this.overlayContainer);
 
-        // NOVO: Flag de controle do usuário
+        // ANCORAGEM ESTRATÉGICA: Injeta no container ao invés do document.body
+        // Garante que o container pai consiga segurar a interface absoluta
+        if (window.getComputedStyle(this.container).position === 'static') {
+            this.container.style.position = 'relative';
+        }
+        this.container.appendChild(this.overlayContainer);
+
         this.isUserActive = true; 
         
         this.isTracking = true;
@@ -73,7 +80,6 @@ export class SecurityUI {
         this.badgeText = this.shadow.getElementById('badge-text');
     }
 
-    // NOVO: Método oficial para ligar/desligar a UI
     toggleVisibility(isActive) {
         this.isUserActive = isActive;
         if (!isActive) {
@@ -89,15 +95,18 @@ export class SecurityUI {
             return;
         }
 
-        const rect = this.videoElement.getBoundingClientRect();
+        // Como agora estamos dentro do container parente (relative), 
+        // top e left podem ficar travados em 0, otimizando drasticamente o uso de CPU.
+        // Só precisamos acompanhar as dimensões reais do vídeo.
+        const width = this.videoElement.offsetWidth || this.videoElement.videoWidth;
+        const height = this.videoElement.offsetHeight || this.videoElement.videoHeight;
 
-        // ATUALIZADO: Só mostra se tiver tamanho E se o usuário não tiver desligado
-        if (rect.width > 50 && rect.height > 50 && this.isUserActive) {
+        if (width > 50 && height > 50 && this.isUserActive) {
             this.overlayContainer.style.display = 'block';
-            this.overlayContainer.style.top = `${rect.top + window.scrollY}px`;
-            this.overlayContainer.style.left = `${rect.left + window.scrollX}px`;
-            this.overlayContainer.style.width = `${rect.width}px`;
-            this.overlayContainer.style.height = `${rect.height}px`;
+            this.overlayContainer.style.top = '0px';
+            this.overlayContainer.style.left = '0px';
+            this.overlayContainer.style.width = `${width}px`;
+            this.overlayContainer.style.height = `${height}px`;
         } else {
             this.overlayContainer.style.display = 'none';
         }

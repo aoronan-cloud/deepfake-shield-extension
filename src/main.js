@@ -18,10 +18,12 @@ async function bootstrap() {
 
     const activeUIs = new Map();
 
-    const handleNewVideo = (videoElement, mediaStream) => {
+    // ATENÇÃO: Adicionada a variável 'container' como o 3º parâmetro
+    const handleNewVideo = (videoElement, mediaStream, container) => {
         console.log("[Shield Maestro] Alvo detectado. Acoplando HUD e IA...");
         
-        const ui = new SecurityUI(videoElement);
+        // Repassamos o 'container' seguro para a interface saber onde desenhar o Shadow DOM
+        const ui = new SecurityUI(videoElement, container);
         activeUIs.set(videoElement, ui);
 
         // Usa a nova função de controle

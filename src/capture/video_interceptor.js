@@ -6,9 +6,13 @@ export class VideoInterceptor {
      */
     constructor(onNewStreamCallback) {
         this.onNewStream = onNewStreamCallback;
-        // O WeakSet impede vazamento de memória quando o Meet apaga vídeos antigos
+        // O WeakSet impede vazamento de memória quando as plataformas apagam vídeos antigos
         this.monitoredVideos = new WeakSet();
         this.domObserver = null;
+
+        // Detecta o ambiente uma única vez na inicialização da classe
+        this.isTeams = window.location.hostname.includes('teams');
+        this.isMeet = window.location.hostname.includes('meet.google');
     }
 
     // Inicia o Vigilante na página
@@ -48,7 +52,7 @@ export class VideoInterceptor {
         if (this.monitoredVideos.has(videoElement)) return;
         this.monitoredVideos.add(videoElement);
 
-        console.log("[Shield Capture] Novo elemento <video> detectado na matriz.");
+        console.log(`[Shield Capture] Novo elemento <video> detectado na matriz. Plataforma: ${this.isTeams ? 'Teams' : 'Meet'}`);
 
         // O evento 'playing' garante que os metadados (resolução, fluxo) já existem
         videoElement.addEventListener('playing', () => {
@@ -57,10 +61,19 @@ export class VideoInterceptor {
             if (stream && stream.getVideoTracks().length > 0) {
                 console.log("[Shield Capture] Fluxo de mídia ativo. Notificando o núcleo principal...");
                 
-                // Dispara o callback passando os DOIS elementos cruciais:
-                // 1. O elemento HTML (para o módulo de UI desenhar a borda em cima)
-                // 2. O MediaStream (para o módulo de IA extrair os pixels)
-                this.onNewStream(videoElement, stream);
+                // Determina o contêiner ideal para ancorar a HUD (Shadow DOM)
+                let container = videoElement.parentElement;
+
+                if (this.isTeams) {
+                    // O Teams aninha o vídeo profundamente em várias divs, precisamos subir na árvore
+                    container = videoElement.closest('[data-tid="video-renderer"]') || videoElement.parentElement.parentElement || videoElement.parentElement;
+                }
+
+                // Dispara o callback passando os TRÊS elementos cruciais:
+                // 1. O elemento HTML do vídeo
+                // 2. O MediaStream (para a IA extrair os pixels)
+                // 3. O Container ideal (para a UI desenhar a caixa verde por cima)
+                this.onNewStream(videoElement, stream, container);
             }
         });
     }

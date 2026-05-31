@@ -3,7 +3,7 @@
   "name": "Shield: Deepfake & AI Detector",
   "version": "1.0.0",
   "description": "Proteção preventiva e em tempo real contra deepfakes e clonagem de voz em videoconferências. 100% local e open-source.",
-  "author": "Seu Nome",
+  "author": "Sua Empresa / Seu Nome",
   "action": {
     "default_popup": "popup/index.html",
     "default_icon": {
@@ -18,13 +18,15 @@
   ],
   "host_permissions": [
     "*://meet.google.com/*",
-    "*://teams.microsoft.com/*"
+    "*://teams.microsoft.com/*",
+    "*://teams.live.com/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "*://meet.google.com/*",
-        "*://teams.microsoft.com/*"
+        "*://teams.microsoft.com/*",
+        "*://teams.live.com/*"
       ],
       "js": ["dist/content_script.js"],
       "run_at": "document_idle"
@@ -37,7 +39,8 @@
       ],
       "matches": [
         "*://meet.google.com/*",
-        "*://teams.microsoft.com/*"
+        "*://teams.microsoft.com/*",
+        "*://teams.live.com/*"
       ]
     }
   ],
