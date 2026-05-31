@@ -25,3 +25,6 @@ env/
 __pycache__/
 *.pt
 *.pth
+
+# Banco de Dados de Treinamento
+dataset/
