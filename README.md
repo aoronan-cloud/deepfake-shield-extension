@@ -1,39 +1,37 @@
-# 🛡️ Shield: Deepfake & AI Detector
+# 🛡️ Deepfake Shield Extension
 
-> Proteção preventiva e em tempo real contra deepfakes e clonagem de voz em videoconferências. 100% local, privado e open-source.
+**Detecção em tempo real de Deepfakes e manipulações por IA em videochamadas, rodando 100% localmente no seu navegador.**
 
-![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-brightgreen)
-![Manifest](https://img.shields.io/badge/Manifest-V3-blue)
-![License](https://img.shields.io/badge/License-GPL%20v3-red)
-![Platform](https://img.shields.io/badge/Platform-Google%20Meet%20%7C%20MS%20Teams-lightgrey)
+[![Licença: GPL Híbrida](https://img.shields.io/badge/License-GPL%20%2B%20Commercial-blue.svg)](LICENSE)
+[![Privacidade: 100% Local](https://img.shields.io/badge/Privacy-100%25%20Local-success.svg)](#)
+[![Tech: WebAssembly & ONNX](https://img.shields.io/badge/Tech-WASM%20%7C%20ONNX-orange.svg)](#)
 
-## 🎯 O Problema
-A proliferação de modelos gerativos e *face-swapping* em tempo real criou um vetor de ataque crítico em ambientes corporativos e reuniões online. Ferramentas de detecção baseadas em nuvem sofrem de latência, custos altos e, o mais importante, ferem a privacidade ao enviar fluxos de vídeo confidenciais para servidores de terceiros.
-
-## 💡 A Solução
-O **Shield** é uma extensão de navegador de baixo nível que intercepta fluxos WebRTC diretamente no DOM. Ele utiliza Modelos Neurais Convolucionais (MobileNet/ONNX) rodando inteiramente na máquina do usuário via WebAssembly (WASM), garantindo **Zero-Trust, Zero-Latency e 100% de Privacidade**.
+O **Deepfake Shield** é uma extensão de navegador focada em segurança corporativa e pessoal. Ele intercepta fluxos de vídeo no Google Meet e utiliza modelos de Inteligência Artificial para analisar micro-padrões e artefatos de renderização, determinando a autenticidade do interlocutor em tempo real.
 
 ---
 
-## 🏗️ Arquitetura Técnica
+## 🚀 O Diferencial: Privacidade Absoluta (Zero-Cloud)
 
-Para garantir que a extensão não consuma recursos excessivos da máquina durante uma chamada de vídeo, o projeto foi arquitetado com separação estrita de responsabilidades:
+Diferente de soluções de mercado que enviam frames do seu vídeo para servidores na nuvem (ferindo regras de *Compliance* e LGPD), o Deepfake Shield processa **tudo no seu próprio hardware**. 
 
-*   **Interceptador do DOM (`MutationObserver`):** Monitora a injeção de novas tags `<video>` nas plataformas (Meet/Teams) em tempo real, sem depender de APIs restritas.
-*   **Motor de IA (ONNX Runtime Web):** O "cérebro" do sistema. Opera extração de tensores NCHW Float32 diretamente de um `<canvas>` fantasma. A inferência matemática roda em **WebAssembly (WASM)**, isolando a carga da CPU.
-*   **Isolamento Visual (Shadow DOM):** A Interface de Usuário (o HUD de detecção e bounding boxes) é injetada via Shadow DOM, garantindo que o CSS nativo do Google/Microsoft não interfira nos alertas de segurança, e vice-versa.
-*   **Empacotador:** Construído com `esbuild` para compilação em milissegundos e minificação agressiva, resultando em um único `content_script.js` altamente otimizado.
+Nós convertemos um modelo treinado em **PyTorch** para o formato **ONNX** e o executamos diretamente no navegador utilizando **WebAssembly (WASM)**.
+* Nenhuma imagem sai da sua máquina.
+* Nenhum dado é armazenado.
+* Latência quase zero.
+
+## 🧠 Arquitetura Técnica
+
+A extensão foi construída com foco em isolamento e performance:
+* **Motor de Inferência:** `onnxruntime-web` operando via WebAssembly para cálculos matriciais de alta velocidade na CPU.
+* **Isolamento de Interface:** Injeção de HUD (Heads-Up Display) sobre o vídeo utilizando **Shadow DOM**, garantindo que o código da extensão não interfira (e nem seja bloqueado) pelos scripts da página da videochamada.
+* **Modelo de IA:** Transfer Learning a partir do MobileNetV2, treinado especificamente para identificar anomalias geradas por Redes Adversárias Generativas (GANs) em rostos humanos.
 
 ---
 
-## 🚀 Como Testar Localmente (Modo Desenvolvedor)
+## 🛠️ Como Instalar (Modo Desenvolvedor)
 
-### Pré-requisitos
-* Node.js e npm instalados.
-* Firefox, Google Chrome ou Microsoft Edge.
+Atualmente a extensão está em fase de lançamento técnico e pode ser instalada manualmente:
 
-### Instalação
-1. Clone o repositório:
-```bash
-   git clone [https://github.com/SEU-USUARIO/deepfake-shield-extension.git](https://github.com/SEU-USUARIO/deepfake-shield-extension.git)
-   cd deepfake-shield-extension
+1. Faça o clone deste repositório:
+   ```bash
+   git clone [https://github.com/aoronan-cloud/deepfake-shield-extension.git](https://github.com/aoronan-cloud/deepfake-shield-extension.git)
