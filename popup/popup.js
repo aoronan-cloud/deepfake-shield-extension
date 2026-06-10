@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Link do GitHub
     githubLink.addEventListener('click', (e) => {
         e.preventDefault();
-        chrome.tabs.create({ url: 'https://github.com/SEU-USUARIO/deepfake-shield' });
+        chrome.tabs.create({ url: 'https://github.com/aoronan-cloud/deepfake-shield' });
     });
 
     // Link de Doação (Apoiar Projeto)
     donateLink.addEventListener('click', (e) => {
         e.preventDefault();
         // Substitua pelo seu link real do PayPal, BuyMeACoffee, Stripe, etc.
-        chrome.tabs.create({ url: 'https://www.paypal.com/donate/?business=LE69LGH4RB7RA&no_recurring=0&currency_code=BRL' }); 
+        chrome.tabs.create({ url: 'https://www.paypal.com/donate/?business=LE69LGH4RB7RA&no_recurring=0&item_name=Criando+ferramentas+de+seguran%C3%A7a+digital+e+Intelig%C3%AAncia+Artificial+open-source%2C+locais+e+focadas+em+privacidade.&currency_code=BRL' }); 
     });
 
     const updateUI = (isActive) => {
