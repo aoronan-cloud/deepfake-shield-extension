@@ -4,12 +4,13 @@ import * as ort from 'onnxruntime-web';
 // --- BLINDAGEM MANIFEST V3 ---
 ort.env.wasm.wasmPaths = chrome.runtime.getURL('public/models/');
 ort.env.wasm.numThreads = 1;
-ort.env.wasm.simd = false;
+ort.env.wasm.simd = true; // Alterado para true para otimizar processamento matemático na CPU caso caia no fallback
 
 export class AIEngine {
     constructor() {
         this.session = null;
         this.isLoaded = false;
+        this.backendName = 'Iniciando...'; // Variável para o Painel Tático
         
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
@@ -22,19 +23,30 @@ export class AIEngine {
     async initialize() {
         if (this.isLoaded) return;
 
-        console.log("[Shield AI] Carregando pesos neurais (ONNX)...");
+        console.log("[Shield AI] Carregando pesos neurais (ONNX) e buscando Placa de Vídeo...");
         
         try {
             const modelPath = chrome.runtime.getURL('public/models/face_detector.onnx');
             
+            // FASE 2: ACELERAÇÃO POR HARDWARE (Ordem de prioridade: WebGPU > WebGL > WASM)
+            const providers = ['webgpu', 'webgl', 'wasm'];
+            
             this.session = await ort.InferenceSession.create(modelPath, {
-                executionProviders: ['wasm']
+                executionProviders: providers
             });
             
+            // Define o nome do backend para a nossa telemetria do popup
+            if (navigator.gpu) {
+                this.backendName = 'WebGPU (Hardware Acelerado)';
+            } else {
+                this.backendName = 'WebGL/WASM (Modo Híbrido)';
+            }
+            
             this.isLoaded = true;
-            console.log("[Shield AI] Cérebro carregado e pronto para inferência.");
+            console.log(`[Shield AI] Cérebro carregado! Rodando via: ${this.backendName}`);
         } catch (error) {
             console.error("[Shield AI] Erro ao inicializar o modelo:", error);
+            this.backendName = 'Erro de Inicialização';
         }
     }
 
@@ -82,22 +94,19 @@ export class AIEngine {
         try {
             const tensor = new ort.Tensor('float32', float32Data, [1, 3, this.TARGET_SIZE, this.TARGET_SIZE]);
             
-            // TÉCNICA AVANÇADA: Pega dinamicamente o nome da porta de entrada do modelo
             const feedName = this.session.inputNames[0];
             const feeds = {};
             feeds[feedName] = tensor;
 
-            // Roda a inferência com o nome exato que o modelo exige
             const results = await this.session.run(feeds); 
             
-            // Pega dinamicamente o nome da porta de saída
             const outputName = this.session.outputNames[0];
             const outputArray = results[outputName].data;
             
             let maxVal = Math.max(...outputArray);
             let normalizedRisk = (Math.tanh(maxVal / 10) + 1) / 2;
             
-            return normalizedRisk;
+            return (normalizedRisk * 100).toFixed(1); // Modificado para retornar em formato de porcentagem (ex: 98.7) para o painel
             
         } catch (e) {
             console.error("[Shield AI] Erro ao processar tensores:", e);

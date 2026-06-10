@@ -1,44 +1,68 @@
 // popup/popup.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    const powerSwitch = document.getElementById('power-switch');
-    const statusDot = document.getElementById('status-dot');
-    const statusText = document.getElementById('status-text');
+    // ... seus outros elementos ...
     const githubLink = document.getElementById('github-link');
+    const donateLink = document.getElementById('donate-link'); // NOVO
 
-    // Link para o seu repositório (atualize depois com a sua URL real)
+    // Link do GitHub
     githubLink.addEventListener('click', (e) => {
         e.preventDefault();
-        chrome.tabs.create({ url: 'https://github.com/SEU-USUARIO/deepfake-shield-extension' });
+        chrome.tabs.create({ url: 'https://github.com/SEU-USUARIO/deepfake-shield' });
     });
 
-    // Função para atualizar o visual baseado no estado
+    // Link de Doação (Apoiar Projeto)
+    donateLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Substitua pelo seu link real do PayPal, BuyMeACoffee, Stripe, etc.
+        chrome.tabs.create({ url: 'https://www.paypal.com/donate/?business=LE69LGH4RB7RA&no_recurring=0&currency_code=BRL' }); 
+    });
+
     const updateUI = (isActive) => {
         if (isActive) {
             statusDot.classList.remove('disabled');
             statusText.innerText = 'Motor IA Ativo';
             statusText.style.color = '#f8fafc';
+            tacticalPanel.style.opacity = '1';
         } else {
             statusDot.classList.add('disabled');
             statusText.innerText = 'Sistema Pausado';
             statusText.style.color = '#94a3b8';
+            tacticalPanel.style.opacity = '0.4';
+            videoScore.innerText = '--%';
+            audioScore.innerText = '--%';
         }
     };
 
-    // 1. Ao abrir o popup, lê o estado salvo (Padrão: Ativo)
     chrome.storage.local.get(['shieldActive'], (result) => {
-        const isActive = result.shieldActive !== false; // Se for undefined, consideramos true
+        const isActive = result.shieldActive !== false;
         powerSwitch.checked = isActive;
         updateUI(isActive);
     });
 
-    // 2. Escuta o clique no botão
     powerSwitch.addEventListener('change', (e) => {
         const isActive = e.target.checked;
-        
-        // Salva na memória da extensão
         chrome.storage.local.set({ shieldActive: isActive }, () => {
             updateUI(isActive);
         });
     });
+
+    // NOVO: Coletor de Telemetria (Roda a cada 1 segundo)
+    setInterval(() => {
+        if (!powerSwitch.checked) return;
+        
+        // Pergunta para a aba atual quais são os status da IA
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: "GET_TELEMETRY" }, (response) => {
+                    if (chrome.runtime.lastError) return; // Se a aba não for suportada, ignora
+                    if (response) {
+                        activePlatform.innerText = response.platform || 'Nenhuma detectada';
+                        engineBackend.innerText = response.backend || 'CPU (WASM)';
+                        videoScore.innerText = response.videoScore ? response.videoScore + '%' : 'Analisando...';
+                        audioScore.innerText = response.audioScore ? response.audioScore + '%' : 'Aguardando Voz...';
+                    }
+                });
+            }
+        });
+    }, 1000);
 });

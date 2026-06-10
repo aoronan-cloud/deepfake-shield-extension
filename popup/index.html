@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-width=1.0">
     <title>Shield Detector</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilo do novo Painel Tático */
+        .tactical-panel { background: #0f172a; border: 1px solid #1e293b; padding: 12px; border-radius: 8px; margin-top: 15px; color: #38bdf8; font-size: 11px; font-family: monospace; transition: opacity 0.3s;}
+        .metric-row { display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px dashed #1e293b; padding-bottom: 4px;}
+        .metric-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+        .metric-label { color: #94a3b8; }
+        .score-safe { color: #10b981; font-weight: bold; }
+    </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">🛡️ Shield</div>
-        <div class="version">v1.0.0</div>
+        <div class="version">v1.1.0</div>
     </div>
 
     <div class="main-content">
@@ -18,7 +26,7 @@
                 <div class="pulse-dot" id="status-dot"></div>
                 <span id="status-text">Motor IA Ativo</span>
             </div>
-            <p class="status-desc">Monitoramento do DOM e extração WebRTC em operação.</p>
+            <p class="status-desc">Monitoramento e extração Multi-Plataforma operando.</p>
         </div>
 
         <div class="control-row">
@@ -28,10 +36,19 @@
                 <span class="slider"></span>
             </label>
         </div>
+
+        <!-- NOVO: PAINEL TÁTICO -->
+        <div class="tactical-panel" id="tactical-panel">
+            <div class="metric-row"><span class="metric-label">Plataforma:</span> <span id="active-platform">Buscando...</span></div>
+            <div class="metric-row"><span class="metric-label">Aceleração:</span> <span id="engine-backend">Iniciando...</span></div>
+            <div class="metric-row"><span class="metric-label">IA Vídeo:</span> <span id="video-score" class="score-safe">--%</span></div>
+            <div class="metric-row"><span class="metric-label">IA Voz:</span> <span id="audio-score" class="score-safe">--%</span></div>
+        </div>
     </div>
 
-    <div class="footer">
-        <a href="#" id="github-link">🔗 GitHub Repositório</a>
+    <div class="footer" style="display: flex; justify-content: space-between; padding: 10px;">
+        <a href="#" id="github-link" style="text-decoration: none; color: #38bdf8;">🔗 GitHub</a>
+        <a href="#" id="donate-link" style="text-decoration: none; color: #10b981; font-weight: bold;">☕ Apoiar Projeto</a>
     </div>
 
     <script src="popup.js"></script>
