@@ -1,37 +1,33 @@
-# 🛡️ Deepfake Shield Extension
+# 🛡️ Shield: Deepfake & AI Detector
 
-**Detecção em tempo real de Deepfakes e manipulações por IA em videochamadas, rodando 100% localmente no seu navegador.**
+O primeiro guarda-costas digital de código aberto que protege profissionais e famílias contra deepfakes e clonagem de voz em tempo real.
 
-[![Licença: GPL Híbrida](https://img.shields.io/badge/License-GPL%20%2B%20Commercial-blue.svg)](LICENSE)
-[![Privacidade: 100% Local](https://img.shields.io/badge/Privacy-100%25%20Local-success.svg)](#)
-[![Tech: WebAssembly & ONNX](https://img.shields.io/badge/Tech-WASM%20%7C%20ONNX-orange.svg)](#)
+![Versão](https://img.shields.io/badge/Vers%C3%A3o-1.1.0-blue)
+![Privacidade](https://img.shields.io/badge/Privacidade-100%25_Offline-success)
+![Plataformas](https://img.shields.io/badge/Plataformas-Meet_%7C_Teams_%7C_Zoom_%7C_WhatsApp_%7C_Discord-lightgrey)
 
-O **Deepfake Shield** é uma extensão de navegador focada em segurança corporativa e pessoal. Ele intercepta fluxos de vídeo no Google Meet e utiliza modelos de Inteligência Artificial para analisar micro-padrões e artefatos de renderização, determinando a autenticidade do interlocutor em tempo real.
+## 🎯 Por que o Shield existe?
 
----
+Com o avanço da Inteligência Artificial, identificar quem está do outro lado da tela tornou-se um desafio. O **Shield** injeta um motor de IA diretamente no seu navegador para analisar microexpressões e padrões de voz, alertando sobre fraudes de identidade antes que elas causem danos.
 
-## 🚀 O Diferencial: Privacidade Absoluta (Zero-Cloud)
+### 💼 Para Profissionais e Empresas
+Evite fraudes financeiras, golpes do "falso CEO" e espionagem corporativa. O Shield garante que a pessoa negociando na videoconferência (Google Meet, MS Teams, Zoom) é autêntica e não um avatar gerado por IA.
 
-Diferente de soluções de mercado que enviam frames do seu vídeo para servidores na nuvem (ferindo regras de *Compliance* e LGPD), o Deepfake Shield processa **tudo no seu próprio hardware**. 
+### 👨‍👩‍👧‍👦 Para Famílias (Proteção de Jovens)
+O escudo definitivo contra predadores online. Jovens e adolescentes são alvos fáceis em plataformas como **Discord** e **WhatsApp Web**. Predadores usam filtros de voz e vídeo (deepfakes) para se passarem por outras crianças. O Shield funciona como um "Bodyguard Digital", alertando o jovem imediatamente se o interlocutor estiver mascarando a própria identidade usando Inteligência Artificial.
 
-Nós convertemos um modelo treinado em **PyTorch** para o formato **ONNX** e o executamos diretamente no navegador utilizando **WebAssembly (WASM)**.
-* Nenhuma imagem sai da sua máquina.
-* Nenhum dado é armazenado.
-* Latência quase zero.
+## 🔒 Privacidade Absoluta (Zero-Cloud)
+O maior diferencial do Shield: **nenhum dado sai do seu computador**. 
+Entendemos que privacidade é inegociável, especialmente ao proteger reuniões sigilosas ou as chamadas de vídeo dos seus filhos. Toda a inferência neural ocorre localmente (via WebAssembly/WebGPU). **Não gravamos sua câmera, não ouvimos seu áudio e não temos servidores na nuvem.**
 
-## 🧠 Arquitetura Técnica
+## 🚀 Como Instalar
 
-A extensão foi construída com foco em isolamento e performance:
-* **Motor de Inferência:** `onnxruntime-web` operando via WebAssembly para cálculos matriciais de alta velocidade na CPU.
-* **Isolamento de Interface:** Injeção de HUD (Heads-Up Display) sobre o vídeo utilizando **Shadow DOM**, garantindo que o código da extensão não interfira (e nem seja bloqueado) pelos scripts da página da videochamada.
-* **Modelo de IA:** Transfer Learning a partir do MobileNetV2, treinado especificamente para identificar anomalias geradas por Redes Adversárias Generativas (GANs) em rostos humanos.
+Em breve, os links oficiais estarão disponíveis nas lojas. Para instalar a versão de desenvolvedor agora:
+1. Baixe o repositório ou o pacote `.zip`.
+2. Acesse `chrome://extensions/` ou `edge://extensions/`.
+3. Ative o "Modo do Desenvolvedor".
+4. Clique em "Carregar sem compactação" e selecione a pasta do projeto.
 
----
-
-## 🛠️ Como Instalar (Modo Desenvolvedor)
-
-Atualmente a extensão está em fase de lançamento técnico e pode ser instalada manualmente:
-
-1. Faça o clone deste repositório:
-   ```bash
-   git clone [https://github.com/aoronan-cloud/deepfake-shield-extension.git](https://github.com/aoronan-cloud/deepfake-shield-extension.git)
+## ☕ Apoie o Projeto
+O Shield é desenvolvido e mantido de forma independente, focado na segurança pública e sem corporações por trás. Se esta ferramenta ajudou você ou sua família, considere apoiar o desenvolvimento:
+[👉 Apoiar via Plataforma de Doação] (Em breve)
