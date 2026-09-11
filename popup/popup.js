@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Link do GitHub
     githubLink.addEventListener('click', (e) => {
         e.preventDefault();
-        chrome.tabs.create({ url: 'https://github.com/aoronan-cloud/deepfake-shield' });
+        chrome.tabs.create({ url: 'https://github.com/aoronan-cloud/deepfake-shield-extension' });
     });
 
     // Link de Doação (Apoiar Projeto)
