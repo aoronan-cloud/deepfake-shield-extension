@@ -1,8 +1,16 @@
 // popup/popup.js
 document.addEventListener('DOMContentLoaded', () => {
-    // ... seus outros elementos ...
     const githubLink = document.getElementById('github-link');
-    const donateLink = document.getElementById('donate-link'); // NOVO
+    const donateLink = document.getElementById('donate-link');
+
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const tacticalPanel = document.getElementById('tactical-panel');
+    const powerSwitch = document.getElementById('power-switch');
+    const activePlatform = document.getElementById('active-platform');
+    const engineBackend = document.getElementById('engine-backend');
+    const videoScore = document.getElementById('video-score');
+    const audioScore = document.getElementById('audio-score');
 
     // Link do GitHub
     githubLink.addEventListener('click', (e) => {

@@ -27,12 +27,24 @@ export class AIEngine {
         
         try {
             const modelPath = chrome.runtime.getURL('public/models/face_detector.onnx');
-            
+
+            // O modelo usa formato ONNX "external data": os pesos reais ficam em
+            // face_detector_custom.onnx.data, não dentro do .onnx. O auto-fetch
+            // interno do onnxruntime-web (Module.MountedFiles) não funciona em
+            // content scripts de extensão, então buscamos os bytes manualmente
+            // e passamos via sessionOptions.externalData.
+            const externalDataUrl = chrome.runtime.getURL('public/models/face_detector_custom.onnx.data');
+            const externalDataResponse = await fetch(externalDataUrl);
+            const externalDataBytes = new Uint8Array(await externalDataResponse.arrayBuffer());
+
             // FASE 2: ACELERAÇÃO POR HARDWARE (Ordem de prioridade: WebGPU > WebGL > WASM)
             const providers = ['webgpu', 'webgl', 'wasm'];
-            
+
             this.session = await ort.InferenceSession.create(modelPath, {
-                executionProviders: providers
+                executionProviders: providers,
+                externalData: [
+                    { path: 'face_detector_custom.onnx.data', data: externalDataBytes }
+                ]
             });
             
             // Define o nome do backend para a nossa telemetria do popup
