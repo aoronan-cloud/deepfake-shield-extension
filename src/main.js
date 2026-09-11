@@ -1,6 +1,7 @@
 // src/main.js
 import { VideoInterceptor } from './capture/video_interceptor.js';
 import { AIEngine } from './ai/onnx_engine.js';
+import { AudioEngine } from './ai/audio_engine.js';
 import { SecurityUI } from './ui/shadow_overlay.js';
 
 console.log("[Shield Maestro v1.1] Inicializando sistema Multi-Plataforma...");
@@ -36,9 +37,12 @@ async function bootstrap() {
 
     const ai = new AIEngine();
     await ai.initialize();
-    
+
     // Se o seu ONNX retornar o backend ativo (WebGPU/WebGL), mapeamos aqui:
-    currentTelemetry.backend = ai.backendName || 'GPU (WebGPU/WebGL)'; 
+    currentTelemetry.backend = ai.backendName || 'GPU (WebGPU/WebGL)';
+
+    const audioAi = new AudioEngine();
+    await audioAi.initialize();
 
     const activeUIs = new Map();
 
@@ -49,15 +53,14 @@ async function bootstrap() {
         activeUIs.set(videoElement, ui);
         ui.toggleVisibility(isShieldActive);
 
-        // NOVO: Extração e Monitoramento de Voz (Áudio)
+        // Extração e Monitoramento de Voz (Áudio)
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length > 0) {
             console.log("[Shield Maestro] Canal de voz detectado. Iniciando monitoramento.");
-            // Exemplo de como você vai repassar isso pro motor de IA no futuro:
-            // ai.processAudio(mediaStream, (audioRisk) => { currentTelemetry.audioScore = audioRisk; });
-            
-            // Simulação de segurança de áudio para o painel tático:
-            setInterval(() => { currentTelemetry.audioScore = (Math.random() * (99.9 - 95.0) + 95.0).toFixed(1); }, 3000);
+
+            audioAi.processStream(mediaStream, (spoofRisk) => {
+                currentTelemetry.audioScore = spoofRisk;
+            });
         }
 
         // Processamento de Vídeo
