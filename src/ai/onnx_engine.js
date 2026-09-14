@@ -36,24 +36,33 @@ export class AIEngine {
             const externalDataUrl = chrome.runtime.getURL('public/models/face_detector_custom.onnx.data');
             const externalDataResponse = await fetch(externalDataUrl);
             const externalDataBytes = new Uint8Array(await externalDataResponse.arrayBuffer());
+            const externalData = [
+                { path: 'face_detector_custom.onnx.data', data: externalDataBytes }
+            ];
 
-            // FASE 2: ACELERAÇÃO POR HARDWARE (Ordem de prioridade: WebGPU > WebGL > WASM)
-            const providers = ['webgpu', 'webgl', 'wasm'];
+            try {
+                // FASE 2: ACELERAÇÃO POR HARDWARE (Ordem de prioridade: WebGPU > WebGL > WASM)
+                this.session = await ort.InferenceSession.create(modelPath, {
+                    executionProviders: ['webgpu', 'webgl', 'wasm'],
+                    externalData
+                });
 
-            this.session = await ort.InferenceSession.create(modelPath, {
-                executionProviders: providers,
-                externalData: [
-                    { path: 'face_detector_custom.onnx.data', data: externalDataBytes }
-                ]
-            });
-            
-            // Define o nome do backend para a nossa telemetria do popup
-            if (navigator.gpu) {
-                this.backendName = 'WebGPU (Hardware Acelerado)';
-            } else {
-                this.backendName = 'WebGL/WASM (Modo Híbrido)';
+                this.backendName = navigator.gpu ? 'WebGPU (Hardware Acelerado)' : 'WebGL/WASM (Modo Híbrido)';
+            } catch (hardwareError) {
+                // Bug conhecido do onnxruntime-web 1.26: quando o navegador concede
+                // um adaptador WebGPU (ex: discord.com, que já usa WebGPU e "aquece"
+                // o adaptador), o build JSEP falha ao montar externalData
+                // ("Module.MountedFiles is not available"), derrubando a sessão.
+                // O backend WASM puro não tem esse problema — refazemos só com ele.
+                console.warn("[Shield AI] Falha com aceleração de hardware, tentando fallback WASM (CPU):", hardwareError.message);
+
+                this.session = await ort.InferenceSession.create(modelPath, {
+                    executionProviders: ['wasm'],
+                    externalData
+                });
+                this.backendName = 'WASM (CPU - Fallback)';
             }
-            
+
             this.isLoaded = true;
             console.log(`[Shield AI] Cérebro carregado! Rodando via: ${this.backendName}`);
         } catch (error) {
