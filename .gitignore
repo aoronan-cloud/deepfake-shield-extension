@@ -28,3 +28,6 @@ __pycache__/
 
 # Banco de Dados de Treinamento
 dataset/
+
+# Pacotes de release (gerados via build, não precisam ir pro git)
+*.zip
