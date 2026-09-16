@@ -23,14 +23,14 @@ export class VideoInterceptor {
             for (const mutation of mutations) {
                 if (mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach((node) => {
-                        // Verifica se o próprio nó é um vídeo
-                        if (node.tagName === 'VIDEO') {
+                        // Verifica se o próprio nó é um vídeo ou áudio
+                        if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO') {
                             this._attach(node);
-                        } 
-                        // Verifica se há vídeos dentro do contêiner adicionado
+                        }
+                        // Verifica se há vídeos/áudios dentro do contêiner adicionado
                         else if (node.nodeType === Node.ELEMENT_NODE) {
-                            const hiddenVideos = node.querySelectorAll('video');
-                            hiddenVideos.forEach(v => this._attach(v));
+                            const hiddenMedia = node.querySelectorAll('video, audio');
+                            hiddenMedia.forEach(v => this._attach(v));
                         }
                     });
                 }
@@ -43,37 +43,49 @@ export class VideoInterceptor {
             subtree: true
         });
 
-        // Varredura de segurança para vídeos que já estavam na tela
-        document.querySelectorAll('video').forEach(v => this._attach(v));
+        // Varredura de segurança para vídeos/áudios que já estavam na tela
+        // (chamadas somente-voz, sem câmera, usam <audio> para o participante remoto)
+        document.querySelectorAll('video, audio').forEach(v => this._attach(v));
     }
 
     // Método privado para ancorar os eventos
-    _attach(videoElement) {
-        if (this.monitoredVideos.has(videoElement)) return;
-        this.monitoredVideos.add(videoElement);
+    _attach(mediaElement) {
+        if (this.monitoredVideos.has(mediaElement)) return;
+        this.monitoredVideos.add(mediaElement);
 
-        console.log(`[Shield Capture] Novo elemento <video> detectado na matriz. Plataforma: ${this.isTeams ? 'Teams' : 'Meet'}`);
+        const isVideoTag = mediaElement.tagName === 'VIDEO';
+        console.log(`[Shield Capture] Novo elemento <${mediaElement.tagName.toLowerCase()}> detectado na matriz. Plataforma: ${this.isTeams ? 'Teams' : 'Meet'}`);
 
         // O evento 'playing' garante que os metadados (resolução, fluxo) já existem
-        videoElement.addEventListener('playing', () => {
-            const stream = videoElement.srcObject;
-            
-            if (stream && stream.getVideoTracks().length > 0) {
-                console.log("[Shield Capture] Fluxo de mídia ativo. Notificando o núcleo principal...");
-                
-                // Determina o contêiner ideal para ancorar a HUD (Shadow DOM)
-                let container = videoElement.parentElement;
+        mediaElement.addEventListener('playing', () => {
+            const stream = mediaElement.srcObject;
+            if (!stream) return;
 
-                if (this.isTeams) {
-                    // O Teams aninha o vídeo profundamente em várias divs, precisamos subir na árvore
-                    container = videoElement.closest('[data-tid="video-renderer"]') || videoElement.parentElement.parentElement || videoElement.parentElement;
+            const hasVideo = stream.getVideoTracks().length > 0;
+            const hasAudio = stream.getAudioTracks().length > 0;
+
+            // Antes só disparava com track de vídeo — isso deixava chamadas
+            // somente-voz (sem câmera) sem nenhuma análise de clonagem de áudio.
+            if (hasVideo || hasAudio) {
+                console.log("[Shield Capture] Fluxo de mídia ativo. Notificando o núcleo principal...");
+
+                // Determina o contêiner ideal para ancorar a HUD (Shadow DOM).
+                // Só faz sentido para vídeo — áudio-só não tem overlay visual.
+                let container = null;
+                if (isVideoTag) {
+                    container = mediaElement.parentElement;
+
+                    if (this.isTeams) {
+                        // O Teams aninha o vídeo profundamente em várias divs, precisamos subir na árvore
+                        container = mediaElement.closest('[data-tid="video-renderer"]') || mediaElement.parentElement.parentElement || mediaElement.parentElement;
+                    }
                 }
 
                 // Dispara o callback passando os TRÊS elementos cruciais:
-                // 1. O elemento HTML do vídeo
-                // 2. O MediaStream (para a IA extrair os pixels)
-                // 3. O Container ideal (para a UI desenhar a caixa verde por cima)
-                this.onNewStream(videoElement, stream, container);
+                // 1. O elemento HTML de mídia (vídeo ou áudio)
+                // 2. O MediaStream (para a IA extrair pixels e/ou samples de áudio)
+                // 3. O Container ideal (para a UI desenhar a caixa verde por cima, se houver vídeo)
+                this.onNewStream(mediaElement, stream, container);
             }
         });
     }

@@ -48,12 +48,25 @@ async function bootstrap() {
 
     const handleNewVideo = (videoElement, mediaStream, container) => {
         console.log(`[Shield Maestro] Alvo detectado no ${currentTelemetry.platform}. Acoplando Defesa...`);
-        
-        const ui = new SecurityUI(videoElement, container);
-        activeUIs.set(videoElement, ui);
-        ui.toggleVisibility(isShieldActive);
 
-        // Extração e Monitoramento de Voz (Áudio)
+        // Overlay visual só existe quando há vídeo de verdade (chamada só de voz não tem o que desenhar)
+        const hasVideoTrack = mediaStream.getVideoTracks().length > 0;
+        let ui = null;
+        if (hasVideoTrack && container) {
+            ui = new SecurityUI(videoElement, container);
+            activeUIs.set(videoElement, ui);
+            ui.toggleVisibility(isShieldActive);
+
+            // Processamento de Vídeo
+            ai.processStream(mediaStream, (riskScore) => {
+                if (isShieldActive) {
+                    ui.updateThreatLevel(riskScore);
+                    currentTelemetry.videoScore = riskScore; // Envia para o painel
+                }
+            });
+        }
+
+        // Extração e Monitoramento de Voz (Áudio) — independe de ter vídeo ou não
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length > 0) {
             console.log("[Shield Maestro] Canal de voz detectado. Iniciando monitoramento.");
@@ -62,14 +75,6 @@ async function bootstrap() {
                 currentTelemetry.audioScore = spoofRisk;
             });
         }
-
-        // Processamento de Vídeo
-        ai.processStream(mediaStream, (riskScore) => {
-            if (isShieldActive) {
-                ui.updateThreatLevel(riskScore);
-                currentTelemetry.videoScore = riskScore; // Envia para o painel
-            }
-        });
     };
 
     const interceptor = new VideoInterceptor(handleNewVideo);
