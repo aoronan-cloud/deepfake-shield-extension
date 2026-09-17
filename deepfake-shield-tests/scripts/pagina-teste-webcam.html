@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Teste de webcam falsa</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 24px; }
+  video { width: 480px; max-width: 100%; border: 2px solid #444; border-radius: 8px; background: #000; }
+  #status { margin-top: 12px; font-size: 14px; color: #9c9; }
+  #erro { color: #f66; }
+</style>
+</head>
+<body>
+<h1>Pagina de teste — camera/microfone falsos</h1>
+<p>Essa pagina so pede acesso a camera e microfone e mostra o video recebido.
+Serve para confirmar que as flags de "fake device" do Chromium estao
+injetando o arquivo certo antes de tentar o Meet/Teams de verdade.</p>
+<video id="v" autoplay playsinline muted></video>
+<div id="status">Solicitando camera/microfone...</div>
+
+<script>
+async function start() {
+  const status = document.getElementById('status');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('v').srcObject = stream;
+    status.textContent = 'Stream recebido OK — se a extensao estiver ativa, ela deveria comecar a analisar agora.';
+    console.log('[teste-webcam] getUserMedia OK, tracks:', stream.getTracks().map(t => t.kind + ':' + t.label));
+  } catch (err) {
+    status.textContent = 'Erro ao pegar camera/microfone: ' + err.message;
+    status.id = 'erro';
+    console.error('[teste-webcam] erro em getUserMedia', err);
+  }
+}
+start();
+</script>
+</body>
+</html>

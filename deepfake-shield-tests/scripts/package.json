@@ -1,0 +1,14 @@
+{
+  "name": "deepfake-shield-test-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Automacao de teste de fumaca para a extensao Shield: Deepfake & AI Detector, usando camera/microfone falsos do Chromium",
+  "scripts": {
+    "test:real": "node run-extension-test.js real",
+    "test:deepfake": "node run-extension-test.js deepfake",
+    "test:all": "node run-extension-test.js real && node run-extension-test.js deepfake"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}

@@ -1,0 +1,14 @@
+# Perfis de navegador usados nos testes — contêm cache, cookies e sessão
+# real de conta Google, nunca devem ir pro git.
+.chrome-profile-manual/
+.chrome-profile-teste/
+
+# Dependências do Playwright
+scripts/node_modules/
+
+# Amostras de vídeo/áudio (binários grandes, potencialmente dados pessoais)
+amostras/real/
+amostras/deepfake/
+
+# Saída dos testes (screenshots/relatórios), não é código nem doc
+relatorios/
