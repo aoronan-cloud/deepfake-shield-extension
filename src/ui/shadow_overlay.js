@@ -115,9 +115,9 @@ export class SecurityUI {
     }
 
     updateThreatLevel(riskScore) {
-        const percentage = (riskScore * 100).toFixed(0);
+        const percentage = Number(riskScore).toFixed(0);
 
-        if (riskScore > 0.70) {
+        if (Number(riskScore) > 70) {
             this.borderBox.classList.add('risk-critical');
             this.badgeText.innerText = `ALERTA IA: ${percentage}%`;
         } else {
