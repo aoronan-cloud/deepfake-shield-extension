@@ -56,8 +56,10 @@ export class VideoInterceptor {
         const isVideoTag = mediaElement.tagName === 'VIDEO';
         console.log(`[Shield Capture] Novo elemento <${mediaElement.tagName.toLowerCase()}> detectado na matriz. Plataforma: ${this.isTeams ? 'Teams' : 'Meet'}`);
 
-        // O evento 'playing' garante que os metadados (resolução, fluxo) já existem
-        mediaElement.addEventListener('playing', () => {
+        let notified = false;
+        const notify = () => {
+            if (notified) return;
+
             const stream = mediaElement.srcObject;
             if (!stream) return;
 
@@ -66,27 +68,40 @@ export class VideoInterceptor {
 
             // Antes só disparava com track de vídeo — isso deixava chamadas
             // somente-voz (sem câmera) sem nenhuma análise de clonagem de áudio.
-            if (hasVideo || hasAudio) {
-                console.log("[Shield Capture] Fluxo de mídia ativo. Notificando o núcleo principal...");
+            if (!hasVideo && !hasAudio) return;
 
-                // Determina o contêiner ideal para ancorar a HUD (Shadow DOM).
-                // Só faz sentido para vídeo — áudio-só não tem overlay visual.
-                let container = null;
-                if (isVideoTag) {
-                    container = mediaElement.parentElement;
+            notified = true;
+            console.log("[Shield Capture] Fluxo de mídia ativo. Notificando o núcleo principal...");
 
-                    if (this.isTeams) {
-                        // O Teams aninha o vídeo profundamente em várias divs, precisamos subir na árvore
-                        container = mediaElement.closest('[data-tid="video-renderer"]') || mediaElement.parentElement.parentElement || mediaElement.parentElement;
-                    }
+            // Determina o contêiner ideal para ancorar a HUD (Shadow DOM).
+            // Só faz sentido para vídeo — áudio-só não tem overlay visual.
+            let container = null;
+            if (isVideoTag) {
+                container = mediaElement.parentElement;
+
+                if (this.isTeams) {
+                    // O Teams aninha o vídeo profundamente em várias divs, precisamos subir na árvore
+                    container = mediaElement.closest('[data-tid="video-renderer"]') || mediaElement.parentElement.parentElement || mediaElement.parentElement;
                 }
-
-                // Dispara o callback passando os TRÊS elementos cruciais:
-                // 1. O elemento HTML de mídia (vídeo ou áudio)
-                // 2. O MediaStream (para a IA extrair pixels e/ou samples de áudio)
-                // 3. O Container ideal (para a UI desenhar a caixa verde por cima, se houver vídeo)
-                this.onNewStream(mediaElement, stream, container);
             }
-        });
+
+            // Dispara o callback passando os TRÊS elementos cruciais:
+            // 1. O elemento HTML de mídia (vídeo ou áudio)
+            // 2. O MediaStream (para a IA extrair pixels e/ou samples de áudio)
+            // 3. O Container ideal (para a UI desenhar a caixa verde por cima, se houver vídeo)
+            this.onNewStream(mediaElement, stream, container);
+        };
+
+        // Algumas plataformas montam o elemento na árvore só depois que a mídia
+        // já começou a tocar (ex.: preparam o stream fora da tela e só inserem
+        // o <audio>/<video> quando está pronto) — nesse caso o 'playing' original
+        // já disparou antes do MutationObserver nos avisar da inserção, e nunca
+        // dispararia de novo sozinho. Por isso checamos o estado atual na hora
+        // de ancorar, além de continuar ouvindo 'playing' para o caso comum.
+        if (!mediaElement.paused && mediaElement.readyState >= 2) {
+            notify();
+        }
+
+        mediaElement.addEventListener('playing', notify);
     }
 }
