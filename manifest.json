@@ -36,6 +36,19 @@
       ],
       "js": ["dist/content_script.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://meet.google.com/*",
+        "*://teams.microsoft.com/*",
+        "*://teams.live.com/*",
+        "*://app.zoom.us/*",
+        "*://web.whatsapp.com/*",
+        "*://discord.com/*"
+      ],
+      "js": ["dist/webrtc_hook.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [

@@ -36,49 +36,90 @@ async function bootstrap() {
     }
 
     const ai = new AIEngine();
-    await ai.initialize();
-
-    // Se o seu ONNX retornar o backend ativo (WebGPU/WebGL), mapeamos aqui:
-    currentTelemetry.backend = ai.backendName || 'GPU (WebGPU/WebGL)';
-
     const audioAi = new AudioEngine();
-    await audioAi.initialize();
 
     const activeUIs = new Map();
+
+    // Evita rodar a inferência de voz duas vezes na mesma track remota — pode
+    // acontecer da plataforma criar seu próprio <audio> para uma track que o
+    // webrtc_hook.js (MAIN world) já tinha sintetizado um <audio> oculto pra ela.
+    const processedAudioTrackIds = new Set();
+
+    // O VideoInterceptor precisa estar escutando ANTES dos engines de IA
+    // terminarem de carregar (~1-2s): o elemento de mídia pode aparecer e disparar
+    // 'playing' enquanto os engines ainda carregam, e queremos processá-lo assim
+    // que possível em vez de perder a corrida (achado ao vivo em 2026-09-19). Por
+    // isso os alvos que chegam cedo ficam numa fila até os engines ficarem prontos.
+    let aiReady = false;
+    let audioReady = false;
+    const pendingVideoTargets = [];
+    const pendingAudioStreams = [];
+
+    const startVideoMonitoring = (videoElement, mediaStream, container) => {
+        const ui = new SecurityUI(videoElement, container);
+        activeUIs.set(videoElement, ui);
+        ui.toggleVisibility(isShieldActive);
+
+        ai.processStream(mediaStream, (riskScore) => {
+            if (isShieldActive) {
+                ui.updateThreatLevel(riskScore);
+                currentTelemetry.videoScore = riskScore; // Envia para o painel
+            }
+        });
+    };
+
+    const startVoiceMonitoring = (audioStream) => {
+        console.log("[Shield Maestro] Canal de voz detectado. Iniciando monitoramento.");
+        audioAi.processStream(audioStream, (spoofRisk) => {
+            currentTelemetry.audioScore = spoofRisk;
+        });
+    };
+
+    const monitorVoice = (audioStream) => {
+        const track = audioStream.getAudioTracks()[0];
+        if (!track || processedAudioTrackIds.has(track.id)) return;
+        processedAudioTrackIds.add(track.id);
+
+        if (audioReady) {
+            startVoiceMonitoring(audioStream);
+        } else {
+            pendingAudioStreams.push(audioStream);
+        }
+    };
 
     const handleNewVideo = (videoElement, mediaStream, container) => {
         console.log(`[Shield Maestro] Alvo detectado no ${currentTelemetry.platform}. Acoplando Defesa...`);
 
         // Overlay visual só existe quando há vídeo de verdade (chamada só de voz não tem o que desenhar)
         const hasVideoTrack = mediaStream.getVideoTracks().length > 0;
-        let ui = null;
         if (hasVideoTrack && container) {
-            ui = new SecurityUI(videoElement, container);
-            activeUIs.set(videoElement, ui);
-            ui.toggleVisibility(isShieldActive);
-
-            // Processamento de Vídeo
-            ai.processStream(mediaStream, (riskScore) => {
-                if (isShieldActive) {
-                    ui.updateThreatLevel(riskScore);
-                    currentTelemetry.videoScore = riskScore; // Envia para o painel
-                }
-            });
+            if (aiReady) {
+                startVideoMonitoring(videoElement, mediaStream, container);
+            } else {
+                pendingVideoTargets.push({ videoElement, mediaStream, container });
+            }
         }
 
         // Extração e Monitoramento de Voz (Áudio) — independe de ter vídeo ou não
-        const audioTracks = mediaStream.getAudioTracks();
-        if (audioTracks.length > 0) {
-            console.log("[Shield Maestro] Canal de voz detectado. Iniciando monitoramento.");
-
-            audioAi.processStream(mediaStream, (spoofRisk) => {
-                currentTelemetry.audioScore = spoofRisk;
-            });
+        if (mediaStream.getAudioTracks().length > 0) {
+            monitorVoice(mediaStream);
         }
     };
 
     const interceptor = new VideoInterceptor(handleNewVideo);
     interceptor.start();
+
+    await ai.initialize();
+    // Se o seu ONNX retornar o backend ativo (WebGPU/WebGL), mapeamos aqui:
+    currentTelemetry.backend = ai.backendName || 'GPU (WebGPU/WebGL)';
+    aiReady = true;
+    pendingVideoTargets.splice(0).forEach(({ videoElement, mediaStream, container }) => {
+        startVideoMonitoring(videoElement, mediaStream, container);
+    });
+
+    await audioAi.initialize();
+    audioReady = true;
+    pendingAudioStreams.splice(0).forEach(startVoiceMonitoring);
 
     // Controle do Liga/Desliga
     chrome.storage.onChanged.addListener((changes, namespace) => {
