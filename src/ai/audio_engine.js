@@ -5,11 +5,13 @@ import * as ort from 'onnxruntime-web';
 // public/models/NOTICE_voice_detector.md para detalhes/atribuição.
 const SAMPLE_RATE = 16000;
 const NB_SAMP = 64600; // ~4.04s a 16kHz, tamanho fixo esperado pelo modelo
+const SILENCE_RMS = 0.003; // ~-50 dBFS; abaixo disso a janela é tratada como silêncio
 
 export class AudioEngine {
     constructor() {
         this.session = null;
         this.isLoaded = false;
+        this._busy = false; // uma inferência por vez para todas as streams
     }
 
     async initialize() {
@@ -30,12 +32,15 @@ export class AudioEngine {
     }
 
     // Acopla no canal de áudio do mediaStream e chama onResultCallback(spoofRiskPercent)
-    // a cada janela de ~4s de fala capturada.
+    // a cada janela de ~4s de fala capturada. Retorna { stop() } para encerrar o
+    // AudioContext quando a track não estiver mais ativa (ex.: retry de negociação
+    // WebRTC descartou a conexão) — sem isso, cada retry deixava um AudioContext e
+    // um loop de inferência rodando pra sempre em paralelo (achado em 2026-09-19).
     processStream(mediaStream, onResultCallback) {
-        if (!this.isLoaded) return;
+        if (!this.isLoaded) return { stop() {} };
 
         const audioTracks = mediaStream.getAudioTracks();
-        if (audioTracks.length === 0) return;
+        if (audioTracks.length === 0) return { stop() {} };
 
         const audioContext = new AudioContext();
         const source = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
@@ -60,22 +65,45 @@ export class AudioEngine {
             merged.set(resampled, pending.length);
             pending = merged;
 
-            if (pending.length >= NB_SAMP && !isInferring) {
+            if (pending.length >= NB_SAMP && !isInferring && !this._busy) {
                 const chunk = pending.slice(0, NB_SAMP);
                 pending = pending.slice(NB_SAMP);
 
+                // Silêncio não tem o que analisar. O Meet cria vários <audio>
+                // placeholder mesmo sozinho na sala — sem este filtro cada um rodava
+                // o AASIST na thread da página e a aba congelava (>100% CPU, 2026-09-20).
+                if (this._rms(chunk) < SILENCE_RMS) return;
+
                 isInferring = true;
+                this._busy = true;
                 this._infer(chunk)
                     .then((spoofRisk) => {
                         if (spoofRisk !== null) onResultCallback(spoofRisk);
                     })
-                    .finally(() => { isInferring = false; });
+                    .finally(() => { isInferring = false; this._busy = false; });
+            } else if (pending.length > NB_SAMP * 2) {
+                // Outra stream está ocupando o motor: descarta o áudio mais antigo
+                // em vez de acumular sem limite.
+                pending = pending.slice(pending.length - NB_SAMP);
             }
         };
 
         source.connect(processor);
         processor.connect(silentGain);
         silentGain.connect(audioContext.destination);
+
+        return {
+            stop() {
+                processor.onaudioprocess = null;
+                audioContext.close().catch(() => {});
+            }
+        };
+    }
+
+    _rms(samples) {
+        let sum = 0;
+        for (let i = 0; i < samples.length; i++) sum += samples[i] * samples[i];
+        return Math.sqrt(sum / samples.length);
     }
 
     _resampleLinear(input, ratio) {

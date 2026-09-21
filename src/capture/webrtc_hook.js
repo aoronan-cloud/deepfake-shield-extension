@@ -38,6 +38,12 @@
                 hiddenAudio.srcObject = new MediaStream([event.track]);
                 document.documentElement.appendChild(hiddenAudio);
                 hiddenAudio.play().catch(() => {});
+
+                // Retries de negociação WebRTC (ex.: Meet tentando estabilizar a
+                // conexão) descartam essa track e criam outra em uma nova
+                // RTCPeerConnection — sem isso o <audio> oculto órfão ficava pra
+                // sempre no DOM (achado em 2026-09-19).
+                event.track.addEventListener('ended', () => hiddenAudio.remove(), { once: true });
             });
         }
     }

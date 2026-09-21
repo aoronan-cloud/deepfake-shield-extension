@@ -70,9 +70,15 @@ async function bootstrap() {
 
     const startVoiceMonitoring = (audioStream) => {
         console.log("[Shield Maestro] Canal de voz detectado. Iniciando monitoramento.");
-        audioAi.processStream(audioStream, (spoofRisk) => {
+        const handle = audioAi.processStream(audioStream, (spoofRisk) => {
             currentTelemetry.audioScore = spoofRisk;
         });
+
+        // Encerra o AudioContext quando a track morre (ex.: retry de negociação
+        // WebRTC descartou essa conexão) — sem isso, cada retry acumulava um
+        // AudioContext/loop de inferência rodando pra sempre em paralelo.
+        const track = audioStream.getAudioTracks()[0];
+        track?.addEventListener('ended', () => handle.stop(), { once: true });
     };
 
     const monitorVoice = (audioStream) => {
