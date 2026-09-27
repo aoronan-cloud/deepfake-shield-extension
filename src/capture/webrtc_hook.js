@@ -41,6 +41,19 @@
         return hiddenAudio;
     };
 
+    // Receivers cujo áudio a página desviou via encoded streams: a track deles
+    // nunca terá som (o Meet decodifica por conta própria), então não vale gastar
+    // um AudioContext monitorando-a no content script.
+    const divertedReceivers = new WeakSet();
+    const receiverProto = window.RTCRtpReceiver && RTCRtpReceiver.prototype;
+    if (receiverProto && receiverProto.createEncodedStreams) {
+        const nativeCreateEncodedStreams = receiverProto.createEncodedStreams;
+        receiverProto.createEncodedStreams = function (...args) {
+            divertedReceivers.add(this);
+            return nativeCreateEncodedStreams.apply(this, args);
+        };
+    }
+
     const NativeRTCPeerConnection = window.RTCPeerConnection;
     if (NativeRTCPeerConnection) {
         class ShieldRTCPeerConnection extends NativeRTCPeerConnection {
@@ -49,16 +62,26 @@
                 this.addEventListener('track', (event) => {
                     if (event.track.kind !== 'audio') return;
 
-                    const hiddenAudio = exposeToContentScript(new MediaStream([event.track]));
-
-                    // Retries de negociação WebRTC (ex.: Meet tentando estabilizar a
-                    // conexão) descartam essa track e criam outra em uma nova
-                    // RTCPeerConnection — sem isso o <audio> oculto órfão ficava pra
-                    // sempre no DOM (achado em 2026-09-19).
-                    event.track.addEventListener('ended', () => hiddenAudio.remove(), { once: true });
+                    // setTimeout: nosso listener é registrado antes do da página, então
+                    // esperamos o dispatch terminar para ela ter chance de chamar
+                    // createEncodedStreams() no próprio handler de 'track'.
+                    setTimeout(() => {
+                        if (divertedReceivers.has(event.receiver) || event.track.readyState === 'ended') return;
+                        watchTrack(event.track);
+                    }, 0);
                 });
             }
         }
+
+        const watchTrack = (track) => {
+            const hiddenAudio = exposeToContentScript(new MediaStream([track]));
+
+            // Retries de negociação WebRTC (ex.: Meet tentando estabilizar a
+            // conexão) descartam essa track e criam outra em uma nova
+            // RTCPeerConnection — sem isso o <audio> oculto órfão ficava pra
+            // sempre no DOM (achado em 2026-09-19).
+            track.addEventListener('ended', () => hiddenAudio.remove(), { once: true });
+        };
 
         window.RTCPeerConnection = ShieldRTCPeerConnection;
     }
