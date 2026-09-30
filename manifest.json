@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Shield: Deepfake & AI Detector",
+  "name": "__MSG_extName__",
   "version": "1.1.0",
-  "description": "Proteção preventiva e em tempo real contra deepfakes e clonagem de voz em videoconferências. 100% local e open-source.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "author": "Sua Empresa / Seu Nome",
   "action": {
     "default_popup": "popup/index.html",

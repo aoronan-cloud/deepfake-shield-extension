@@ -1,0 +1,110 @@
+{
+  "extName": {
+    "message": "Shield: Deepfake & AI Detector",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Proteção preventiva e em tempo real contra deepfakes e clonagem de voz em videoconferências. 100% local e open-source.",
+    "description": "Store/extension description"
+  },
+  "statusActive": {
+    "message": "Motor IA Ativo",
+    "description": "Popup status when protection is on"
+  },
+  "statusPaused": {
+    "message": "Sistema Pausado",
+    "description": "Popup status when protection is off"
+  },
+  "statusDesc": {
+    "message": "Monitoramento e extração Multi-Plataforma operando.",
+    "description": "Popup status subtitle"
+  },
+  "realtimeProtection": {
+    "message": "Proteção em Tempo Real",
+    "description": "Popup on/off switch label"
+  },
+  "labelPlatform": {
+    "message": "Plataforma:",
+    "description": "Popup metric label"
+  },
+  "labelAcceleration": {
+    "message": "Aceleração:",
+    "description": "Popup metric label"
+  },
+  "labelVideoAi": {
+    "message": "IA Vídeo:",
+    "description": "Popup metric label: video AI score"
+  },
+  "labelVoiceAi": {
+    "message": "IA Voz:",
+    "description": "Popup metric label: voice AI score"
+  },
+  "searching": {
+    "message": "Buscando...",
+    "description": "Platform not detected yet"
+  },
+  "starting": {
+    "message": "Iniciando...",
+    "description": "AI engine loading"
+  },
+  "noneDetected": {
+    "message": "Nenhuma detectada",
+    "description": "No supported platform in tab"
+  },
+  "analyzing": {
+    "message": "Analisando...",
+    "description": "Video score pending"
+  },
+  "waitingVoice": {
+    "message": "Aguardando Voz...",
+    "description": "Voice score pending"
+  },
+  "supportProject": {
+    "message": "Apoiar Projeto",
+    "description": "Donate link"
+  },
+  "platformUnknown": {
+    "message": "Desconhecida",
+    "description": "Unrecognized platform"
+  },
+  "backendAccelerating": {
+    "message": "Acelerando Hardware...",
+    "description": "Backend loading"
+  },
+  "backendWebGPU": {
+    "message": "WebGPU (Hardware Acelerado)",
+    "description": "Backend name"
+  },
+  "backendHybrid": {
+    "message": "WebGL/WASM (Modo Híbrido)",
+    "description": "Backend name"
+  },
+  "backendWasm": {
+    "message": "WASM (CPU - Fallback)",
+    "description": "Backend name"
+  },
+  "backendError": {
+    "message": "Erro de Inicialização",
+    "description": "Backend failed"
+  },
+  "overlayAuthentic": {
+    "message": "Autêntico: $PCT$%",
+    "description": "Badge on a video judged real",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "overlayAlert": {
+    "message": "ALERTA IA: $PCT$%",
+    "description": "Badge on a video judged AI-generated",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  }
+}

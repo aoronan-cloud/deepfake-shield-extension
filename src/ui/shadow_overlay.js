@@ -72,7 +72,7 @@ export class SecurityUI {
                 }
             </style>
             <div class="shield-box" id="border-box">
-                <div class="shield-badge" id="badge-text">Autêntico</div>
+                <div class="shield-badge" id="badge-text">${chrome.i18n.getMessage('overlayAuthentic', '--')}</div>
             </div>
         `;
         this.shadow.appendChild(wrapper);
@@ -119,10 +119,10 @@ export class SecurityUI {
 
         if (Number(riskScore) > 70) {
             this.borderBox.classList.add('risk-critical');
-            this.badgeText.innerText = `ALERTA IA: ${percentage}%`;
+            this.badgeText.innerText = chrome.i18n.getMessage('overlayAlert', percentage);
         } else {
             this.borderBox.classList.remove('risk-critical');
-            this.badgeText.innerText = `Autêntico: ${percentage}%`;
+            this.badgeText.innerText = chrome.i18n.getMessage('overlayAuthentic', percentage);
         }
     }
 

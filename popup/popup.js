@@ -1,5 +1,12 @@
 // popup/popup.js
 document.addEventListener('DOMContentLoaded', () => {
+    // Textos da interface vêm de _locales/<idioma>/messages.json (idioma do navegador)
+    const t = (key) => chrome.i18n.getMessage(key);
+    document.documentElement.lang = chrome.i18n.getUILanguage();
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+        el.textContent = t(el.dataset.i18n);
+    });
+
     const githubLink = document.getElementById('github-link');
     const donateLink = document.getElementById('donate-link');
 
@@ -28,12 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateUI = (isActive) => {
         if (isActive) {
             statusDot.classList.remove('disabled');
-            statusText.innerText = 'Motor IA Ativo';
+            statusText.innerText = t('statusActive');
             statusText.style.color = '#f8fafc';
             tacticalPanel.style.opacity = '1';
         } else {
             statusDot.classList.add('disabled');
-            statusText.innerText = 'Sistema Pausado';
+            statusText.innerText = t('statusPaused');
             statusText.style.color = '#94a3b8';
             tacticalPanel.style.opacity = '0.4';
             videoScore.innerText = '--%';
@@ -64,10 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 chrome.tabs.sendMessage(tabs[0].id, { action: "GET_TELEMETRY" }, (response) => {
                     if (chrome.runtime.lastError) return; // Se a aba não for suportada, ignora
                     if (response) {
-                        activePlatform.innerText = response.platform || 'Nenhuma detectada';
+                        activePlatform.innerText = response.platform || t('noneDetected');
                         engineBackend.innerText = response.backend || 'CPU (WASM)';
-                        videoScore.innerText = response.videoScore ? response.videoScore + '%' : 'Analisando...';
-                        audioScore.innerText = response.audioScore ? response.audioScore + '%' : 'Aguardando Voz...';
+                        videoScore.innerText = response.videoScore ? response.videoScore + '%' : t('analyzing');
+                        audioScore.innerText = response.audioScore ? response.audioScore + '%' : t('waitingVoice');
                     }
                 });
             }

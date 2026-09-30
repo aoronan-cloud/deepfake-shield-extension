@@ -10,8 +10,8 @@ let isShieldActive = true;
 
 // NOVO: Memória de Telemetria (Para o Painel Popup)
 let currentTelemetry = {
-    backend: 'Acelerando Hardware...',
-    platform: 'Buscando...',
+    backend: chrome.i18n.getMessage('backendAccelerating'),
+    platform: chrome.i18n.getMessage('searching'),
     videoScore: null,
     audioScore: null
 };
@@ -24,7 +24,7 @@ function detectPlatform() {
     if (host.includes('zoom.us')) return 'Zoom Web';
     if (host.includes('discord.com')) return 'Discord';
     if (host.includes('whatsapp.com')) return 'WhatsApp Web';
-    return 'Desconhecida';
+    return chrome.i18n.getMessage('platformUnknown');
 }
 
 async function bootstrap() {

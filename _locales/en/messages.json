@@ -1,0 +1,110 @@
+{
+  "extName": {
+    "message": "Shield: Deepfake & AI Detector",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Real-time, preventive protection against deepfakes and voice cloning in video calls. 100% local and open source.",
+    "description": "Store/extension description"
+  },
+  "statusActive": {
+    "message": "AI Engine Active",
+    "description": "Popup status when protection is on"
+  },
+  "statusPaused": {
+    "message": "System Paused",
+    "description": "Popup status when protection is off"
+  },
+  "statusDesc": {
+    "message": "Multi-platform monitoring running.",
+    "description": "Popup status subtitle"
+  },
+  "realtimeProtection": {
+    "message": "Real-Time Protection",
+    "description": "Popup on/off switch label"
+  },
+  "labelPlatform": {
+    "message": "Platform:",
+    "description": "Popup metric label"
+  },
+  "labelAcceleration": {
+    "message": "Acceleration:",
+    "description": "Popup metric label"
+  },
+  "labelVideoAi": {
+    "message": "AI Video:",
+    "description": "Popup metric label: video AI score"
+  },
+  "labelVoiceAi": {
+    "message": "AI Voice:",
+    "description": "Popup metric label: voice AI score"
+  },
+  "searching": {
+    "message": "Searching...",
+    "description": "Platform not detected yet"
+  },
+  "starting": {
+    "message": "Starting...",
+    "description": "AI engine loading"
+  },
+  "noneDetected": {
+    "message": "None detected",
+    "description": "No supported platform in tab"
+  },
+  "analyzing": {
+    "message": "Analyzing...",
+    "description": "Video score pending"
+  },
+  "waitingVoice": {
+    "message": "Waiting for voice...",
+    "description": "Voice score pending"
+  },
+  "supportProject": {
+    "message": "Support Project",
+    "description": "Donate link"
+  },
+  "platformUnknown": {
+    "message": "Unknown",
+    "description": "Unrecognized platform"
+  },
+  "backendAccelerating": {
+    "message": "Accelerating hardware...",
+    "description": "Backend loading"
+  },
+  "backendWebGPU": {
+    "message": "WebGPU (Hardware Accelerated)",
+    "description": "Backend name"
+  },
+  "backendHybrid": {
+    "message": "WebGL/WASM (Hybrid Mode)",
+    "description": "Backend name"
+  },
+  "backendWasm": {
+    "message": "WASM (CPU - Fallback)",
+    "description": "Backend name"
+  },
+  "backendError": {
+    "message": "Initialization Error",
+    "description": "Backend failed"
+  },
+  "overlayAuthentic": {
+    "message": "Authentic: $PCT$%",
+    "description": "Badge on a video judged real",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "overlayAlert": {
+    "message": "AI ALERT: $PCT$%",
+    "description": "Badge on a video judged AI-generated",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  }
+}

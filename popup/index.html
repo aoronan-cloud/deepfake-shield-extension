@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-width=1.0">
@@ -24,13 +24,13 @@
         <div class="status-card">
             <div class="status-indicator">
                 <div class="pulse-dot" id="status-dot"></div>
-                <span id="status-text">Motor IA Ativo</span>
+                <span id="status-text" data-i18n="statusActive"></span>
             </div>
-            <p class="status-desc">Monitoramento e extração Multi-Plataforma operando.</p>
+            <p class="status-desc" data-i18n="statusDesc"></p>
         </div>
 
         <div class="control-row">
-            <span>Proteção em Tempo Real</span>
+            <span data-i18n="realtimeProtection"></span>
             <label class="switch">
                 <input type="checkbox" id="power-switch" checked>
                 <span class="slider"></span>
@@ -39,16 +39,16 @@
 
         <!-- NOVO: PAINEL TÁTICO -->
         <div class="tactical-panel" id="tactical-panel">
-            <div class="metric-row"><span class="metric-label">Plataforma:</span> <span id="active-platform">Buscando...</span></div>
-            <div class="metric-row"><span class="metric-label">Aceleração:</span> <span id="engine-backend">Iniciando...</span></div>
-            <div class="metric-row"><span class="metric-label">IA Vídeo:</span> <span id="video-score" class="score-safe">--%</span></div>
-            <div class="metric-row"><span class="metric-label">IA Voz:</span> <span id="audio-score" class="score-safe">--%</span></div>
+            <div class="metric-row"><span class="metric-label" data-i18n="labelPlatform"></span> <span id="active-platform" data-i18n="searching"></span></div>
+            <div class="metric-row"><span class="metric-label" data-i18n="labelAcceleration"></span> <span id="engine-backend" data-i18n="starting"></span></div>
+            <div class="metric-row"><span class="metric-label" data-i18n="labelVideoAi"></span> <span id="video-score" class="score-safe">--%</span></div>
+            <div class="metric-row"><span class="metric-label" data-i18n="labelVoiceAi"></span> <span id="audio-score" class="score-safe">--%</span></div>
         </div>
     </div>
 
     <div class="footer" style="display: flex; justify-content: space-between; padding: 10px;">
         <a href="#" id="github-link" style="text-decoration: none; color: #38bdf8;">🔗 GitHub</a>
-        <a href="#" id="donate-link" style="text-decoration: none; color: #10b981; font-weight: bold;">☕ Apoiar Projeto</a>
+        <a href="#" id="donate-link" style="text-decoration: none; color: #10b981; font-weight: bold;">☕ <span data-i18n="supportProject"></span></a>
     </div>
 
     <script src="popup.js"></script>

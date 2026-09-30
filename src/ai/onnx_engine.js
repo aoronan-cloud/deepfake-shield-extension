@@ -10,7 +10,7 @@ export class AIEngine {
     constructor() {
         this.session = null;
         this.isLoaded = false;
-        this.backendName = 'Iniciando...'; // Variável para o Painel Tático
+        this.backendName = chrome.i18n.getMessage('starting'); // Variável para o Painel Tático
         
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
@@ -47,7 +47,7 @@ export class AIEngine {
                     externalData
                 });
 
-                this.backendName = navigator.gpu ? 'WebGPU (Hardware Acelerado)' : 'WebGL/WASM (Modo Híbrido)';
+                this.backendName = chrome.i18n.getMessage(navigator.gpu ? 'backendWebGPU' : 'backendHybrid');
             } catch (hardwareError) {
                 // Bug conhecido do onnxruntime-web 1.26: quando o navegador concede
                 // um adaptador WebGPU (ex: discord.com, que já usa WebGPU e "aquece"
@@ -60,14 +60,14 @@ export class AIEngine {
                     executionProviders: ['wasm'],
                     externalData
                 });
-                this.backendName = 'WASM (CPU - Fallback)';
+                this.backendName = chrome.i18n.getMessage('backendWasm');
             }
 
             this.isLoaded = true;
             console.log(`[Shield AI] Cérebro carregado! Rodando via: ${this.backendName}`);
         } catch (error) {
             console.error("[Shield AI] Erro ao inicializar o modelo:", error);
-            this.backendName = 'Erro de Inicialização';
+            this.backendName = chrome.i18n.getMessage('backendError');
         }
     }
 
